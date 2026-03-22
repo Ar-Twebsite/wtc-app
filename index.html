@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>WTC Frame</title>
+  <meta name="description" content="Aggiungi il frame WTC Services alle tue foto per LinkedIn e social">
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A0B0F">
+  <meta name="color-scheme" content="dark">
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WTC Frame">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Layered background -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="ambient-orb ambient-orb--top" aria-hidden="true"></div>
+  <div class="ambient-orb ambient-orb--bottom" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <!-- ── Header ──────────────────────────────────────────────── -->
+    <header class="app-header">
+      <img src="assets/wtc-logo.png" alt="WTC Services" class="app-logo">
+      <div class="app-header-spacer"></div>
+      <div class="app-status-dot" aria-label="App attiva" title="App attiva"></div>
+    </header>
+
+    <!-- ── State: empty ────────────────────────────────────────── -->
+    <main id="state-empty" class="state active" role="main">
+
+      <!-- Visual preview of what the overlay looks like -->
+      <div class="hero-preview" aria-hidden="true">
+        <div class="preview-frame">
+          <div class="preview-photo-bg"></div>
+          <img class="preview-overlay" src="assets/overlay.png" alt="">
+          <div class="preview-scan-line"></div>
+        </div>
+        <div class="preview-badge">
+          <span class="preview-badge-dot"></span>
+          Frame WTC Services
+        </div>
+        <div class="preview-corner preview-corner--tl"></div>
+        <div class="preview-corner preview-corner--tr"></div>
+        <div class="preview-corner preview-corner--bl"></div>
+        <div class="preview-corner preview-corner--br"></div>
+      </div>
+
+      <!-- Heading + sub -->
+      <div class="hero-text">
+        <h2 class="hero-heading">
+          Le tue foto,<br>
+          <span class="text-orange-gradient">con il brand WTC.</span>
+        </h2>
+        <p class="hero-sub">
+          Applica il frame ufficiale WTC Services in un tocco.
+          Tutto sul dispositivo, nessun upload.
+        </p>
+      </div>
+
+      <!-- CTA -->
+      <div class="hero-cta">
+        <label class="btn btn-hero" for="file-input" role="button" tabindex="0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          Scegli dalla galleria
+        </label>
+        <input id="file-input" type="file" accept="image/*" multiple class="sr-only" aria-label="Seleziona foto dalla galleria">
+
+        <div class="feature-pills" aria-label="Caratteristiche">
+          <span class="pill">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16M16 6v16"/></svg>
+            Offline
+          </span>
+          <span class="pill">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Istantaneo
+          </span>
+          <span class="pill">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Privato
+          </span>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── State: processing ──────────────────────────────────── -->
+    <main id="state-processing" class="state" role="main" aria-live="polite" aria-busy="true">
+      <div class="loader-wrap" aria-hidden="true">
+        <div class="loader-ring loader-ring--outer"></div>
+        <div class="loader-ring loader-ring--mid"></div>
+        <div class="loader-ring loader-ring--inner"></div>
+        <div class="loader-core">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+      </div>
+      <p class="processing-label" id="processing-label">Applicazione frame…</p>
+      <p class="processing-count" id="processing-count"></p>
+    </main>
+
+    <!-- ── State: results ────────────────────────────────────── -->
+    <main id="state-results" class="state" role="main">
+
+      <div class="results-toolbar">
+        <div class="results-toolbar-left">
+          <span class="results-count-badge" id="results-count"></span>
+          <span class="results-label">foto pronte</span>
+        </div>
+        <label class="btn btn-ghost btn-sm" for="file-input-more" role="button" tabindex="0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Aggiungi
+        </label>
+        <input id="file-input-more" type="file" accept="image/*" multiple class="sr-only" aria-label="Aggiungi altre foto">
+        <button class="btn btn-ghost btn-sm btn-reset" id="btn-reset" aria-label="Elimina tutte e ricomincia">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          Ricomincia
+        </button>
+      </div>
+
+      <div class="photo-grid" id="photo-grid" role="list"></div>
+
+    </main>
+
+  </div><!-- /.app-shell -->
+
+  <!-- ── Bottom bar ──────────────────────────────────────────── -->
+  <div class="bottom-bar" id="bottom-bar" aria-label="Azioni" role="toolbar">
+    <label class="btn btn-outline-subtle" for="file-input-more-bar" role="button" tabindex="0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Aggiungi
+    </label>
+    <input id="file-input-more-bar" type="file" accept="image/*" multiple class="sr-only" aria-label="Aggiungi altre foto">
+    <button class="btn btn-primary btn-save-all" id="btn-save-all">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Salva tutte
+    </button>
+  </div>
+
+  <!-- ── iOS install banner ──────────────────────────────────── -->
+  <div id="install-banner" class="install-banner" hidden role="complementary">
+    <div class="install-banner-inner">
+      <div class="install-banner-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      </div>
+      <div class="install-banner-text">
+        Installa l'app: tocca
+        <svg class="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        poi <strong>"Aggiungi a Home"</strong>
+      </div>
+      <button class="install-banner-close" id="install-banner-close" aria-label="Chiudi">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Lightbox ──────────────────────────────────────────────── -->
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Anteprima foto">
+    <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Chiudi">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <button class="lightbox-nav lightbox-nav--prev" id="lightbox-prev" aria-label="Foto precedente">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="lightbox-content">
+      <img id="lightbox-img" src="" alt="" class="lightbox-img">
+    </div>
+    <button class="lightbox-nav lightbox-nav--next" id="lightbox-next" aria-label="Foto successiva">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer crossorigin="anonymous"></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>
