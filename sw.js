@@ -4,11 +4,11 @@
    • App shell + overlay: Cache-First (pre-cached on install)
    • Font CDNs: Network-First with cache fallback (fonts update rarely)
    • JSZip CDN: Cache-First (versioned URL, never changes)
-   To update: bump CACHE_NAME to 'wtc-app-v4' — activate handler
+   To update: bump CACHE_NAME to 'wtc-app-v7' — activate handler
    automatically deletes old caches.
 ───────────────────────────────────────────────────────────────── */
 
-const CACHE_NAME = 'wtc-app-v5';
+const CACHE_NAME = 'wtc-app-v6';
 
 // Everything needed to run the app completely offline
 const APP_SHELL = [
@@ -17,10 +17,18 @@ const APP_SHELL = [
   './manifest.json',
   './css/styles.css',
   './js/app.js',
-  './assets/overlay.png',
   './assets/wtc-logo.png',
   './assets/icon-192.png',
   './assets/icon-512.png',
+  './assets/overlays/linkedin.png',
+  './assets/overlays/ig-h-centro.png',
+  './assets/overlays/ig-h-destra.png',
+  './assets/overlays/ig-h-sinistra.png',
+  './assets/overlays/ig-h-alto.png',
+  './assets/overlays/ig-v-centro.png',
+  './assets/overlays/ig-v-destra.png',
+  './assets/overlays/ig-v-sinistra.png',
+  './assets/overlays/ig-v-alto.png',
 ];
 
 // ── Install: pre-cache app shell ──────────────────────────────────

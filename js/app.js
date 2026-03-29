@@ -5,10 +5,29 @@
    loaded via CDN and only used on desktop for batch download).
 ───────────────────────────────────────────────────────────────── */
 
+// ── Overlay definitions ────────────────────────────────────────────
+// anchorV: where the logo sits vertically ('top' or 'bottom')
+// anchorH: where the logo sits horizontally ('left', 'center', or 'right')
+// The compositing logic anchors the overlay to that corner/edge so the
+// logo is always fully visible regardless of the photo's aspect ratio.
+const OVERLAYS = [
+  { key: 'linkedin',      label: 'LinkedIn',  src: 'assets/overlays/linkedin.png',      anchorV: 'bottom', anchorH: 'center', group: 'linkedin' },
+  { key: 'ig-h-centro',   label: 'Centro',    src: 'assets/overlays/ig-h-centro.png',   anchorV: 'bottom', anchorH: 'center', group: 'ig-h' },
+  { key: 'ig-h-destra',   label: 'Destra',    src: 'assets/overlays/ig-h-destra.png',   anchorV: 'bottom', anchorH: 'right',  group: 'ig-h' },
+  { key: 'ig-h-sinistra', label: 'Sinistra',  src: 'assets/overlays/ig-h-sinistra.png', anchorV: 'bottom', anchorH: 'left',   group: 'ig-h' },
+  { key: 'ig-h-alto',     label: 'Alto',      src: 'assets/overlays/ig-h-alto.png',     anchorV: 'top',    anchorH: 'center', group: 'ig-h' },
+  { key: 'ig-v-centro',   label: 'Centro',    src: 'assets/overlays/ig-v-centro.png',   anchorV: 'bottom', anchorH: 'center', group: 'ig-v' },
+  { key: 'ig-v-destra',   label: 'Destra',    src: 'assets/overlays/ig-v-destra.png',   anchorV: 'bottom', anchorH: 'right',  group: 'ig-v' },
+  { key: 'ig-v-sinistra', label: 'Sinistra',  src: 'assets/overlays/ig-v-sinistra.png', anchorV: 'bottom', anchorH: 'left',   group: 'ig-v' },
+  { key: 'ig-v-alto',     label: 'Alto',      src: 'assets/overlays/ig-v-alto.png',     anchorV: 'top',    anchorH: 'center', group: 'ig-v' },
+];
+
 // ── State ─────────────────────────────────────────────────────────
 const state = {
   /** @type {HTMLImageElement|null} Pre-loaded overlay image */
   overlayImg: null,
+  /** @type {string} Key of the currently selected overlay */
+  overlayKey: localStorage.getItem('wtc-overlay') ?? 'linkedin',
   /** @type {Array<{originalName:string, blob:Blob, previewUrl:string}>} */
   results: [],
   /** @type {boolean} True on iOS — affects save labels and share flow */
@@ -23,26 +42,93 @@ let lightboxIndex = 0;
 // ── Init ──────────────────────────────────────────────────────────
 async function init() {
   updateSaveLabels();
-  await preloadOverlay();
+  // Validate saved key (in case it references an old/removed overlay)
+  const cfg = OVERLAYS.find(o => o.key === state.overlayKey) ?? OVERLAYS[0];
+  state.overlayKey = cfg.key;
+  await preloadOverlay(cfg.src);
+  renderOverlaySelector();
+  updateHeroPreview(cfg);
   bindEvents();
   registerServiceWorker();
   checkInstallPrompt();
+  checkUpdateBanner();
 }
 
 document.addEventListener('DOMContentLoaded', init);
 
 // ── Overlay pre-load ──────────────────────────────────────────────
-// Load the overlay PNG once on startup so it's ready the moment the
-// user taps "Save" (iOS requires share() to be in a direct gesture handler
-// with no async gap after user action — having the image pre-loaded means
+// Load the overlay PNG once so it's ready the moment the user taps
+// "Save" (iOS requires share() to be in a direct gesture handler with
+// no async gap after user action — having the image pre-loaded means
 // compositeImage() completes synchronously enough to satisfy this).
-function preloadOverlay() {
+function preloadOverlay(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload  = () => { state.overlayImg = img; resolve(); };
-    img.onerror = () => reject(new Error('Could not load overlay image'));
-    img.src = 'assets/overlay.png';
+    img.onerror = () => reject(new Error('Could not load overlay: ' + src));
+    img.src = src;
   });
+}
+
+// ── Overlay selection ─────────────────────────────────────────────
+function getOverlayCfg() {
+  return OVERLAYS.find(o => o.key === state.overlayKey) ?? OVERLAYS[0];
+}
+
+async function selectOverlay(key) {
+  const cfg = OVERLAYS.find(o => o.key === key);
+  if (!cfg || key === state.overlayKey) return;
+  state.overlayKey = key;
+  localStorage.setItem('wtc-overlay', key);
+  await preloadOverlay(cfg.src);
+  updateHeroPreview(cfg);
+}
+
+function updateHeroPreview(cfg) {
+  const img = document.getElementById('preview-overlay');
+  if (!img) return;
+  img.src = cfg.src;
+  // Match object-position to where the logo actually sits in the overlay
+  img.style.objectPosition = cfg.anchorV === 'top' ? 'top center' : 'bottom center';
+}
+
+function renderOverlaySelector() {
+  const cfg = getOverlayCfg();
+
+  // Activate the correct group tab
+  document.querySelectorAll('.overlay-tab').forEach(btn => {
+    const active = btn.dataset.group === cfg.group;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+
+  // Show/populate variant chips for Instagram groups
+  const variantsEl = document.getElementById('overlay-variants');
+  if (!variantsEl) return;
+
+  if (cfg.group === 'linkedin') {
+    variantsEl.hidden = true;
+    variantsEl.innerHTML = '';
+    return;
+  }
+
+  const variants = OVERLAYS.filter(o => o.group === cfg.group);
+  variantsEl.hidden = false;
+  variantsEl.innerHTML = variants.map(v => `
+    <button class="overlay-variant${v.key === cfg.key ? ' active' : ''}"
+            data-key="${v.key}"
+            aria-pressed="${v.key === cfg.key ? 'true' : 'false'}">
+      ${v.label}
+    </button>
+  `).join('');
+}
+
+// ── One-time update notification ──────────────────────────────────
+function checkUpdateBanner() {
+  if (!localStorage.getItem('wtc-overlay-update-seen')) {
+    const banner = document.getElementById('update-banner');
+    if (banner) banner.hidden = false;
+  }
 }
 
 // ── Platform-aware labels ─────────────────────────────────────────
@@ -100,6 +186,34 @@ function bindEvents() {
     ?.addEventListener('click', () => {
       document.getElementById('install-banner').hidden = true;
       sessionStorage.setItem('install-dismissed', '1');
+    });
+
+  // Overlay group tabs (LinkedIn / IG Orizzontale / IG Verticale)
+  document.getElementById('overlay-tabs')
+    ?.addEventListener('click', async e => {
+      const tab = e.target.closest('.overlay-tab');
+      if (!tab) return;
+      const first = OVERLAYS.find(o => o.group === tab.dataset.group);
+      if (first) {
+        await selectOverlay(first.key);
+        renderOverlaySelector();
+      }
+    });
+
+  // Overlay variant chips (Centro / Destra / Sinistra / Alto …)
+  document.getElementById('overlay-variants')
+    ?.addEventListener('click', async e => {
+      const chip = e.target.closest('.overlay-variant');
+      if (!chip) return;
+      await selectOverlay(chip.dataset.key);
+      renderOverlaySelector();
+    });
+
+  // Update banner close
+  document.getElementById('update-banner-close')
+    ?.addEventListener('click', () => {
+      document.getElementById('update-banner').hidden = true;
+      localStorage.setItem('wtc-overlay-update-seen', '1');
     });
 }
 
@@ -183,28 +297,32 @@ function applyVignette(ctx, W, H) {
 }
 
 // ── Canvas compositing ────────────────────────────────────────────
-// Overlay is 2048 × 1152, logo at bottom center.
 // Strategy: scale overlay to COVER the photo (like CSS object-fit:cover),
-// anchor to bottom center → logo always fully visible, top/sides may crop.
+// then anchor to the edge/corner where the logo sits — it's always fully
+// visible while the opposite sides may be cropped for unusual aspect ratios.
 function compositeImage(photoImg) {
   return new Promise((resolve, reject) => {
     const W = photoImg.naturalWidth;
     const H = photoImg.naturalHeight;
 
-    // Overlay native dimensions
-    const OW = 2048;
-    const OH = 1152;
+    const cfg = getOverlayCfg();
+
+    // Use the overlay's actual dimensions (works for all aspect ratios)
+    const OW = state.overlayImg.naturalWidth;
+    const OH = state.overlayImg.naturalHeight;
 
     // Scale so the overlay covers the entire photo
     const scale = Math.max(W / OW, H / OH);
-
-    // Scaled overlay dimensions
     const scaledW = OW * scale;
     const scaledH = OH * scale;
 
-    // Center horizontally, anchor bottom
-    const x = (W - scaledW) / 2;
-    const y = H - scaledH;
+    // Horizontal: anchor to the side where the logo is
+    const x = cfg.anchorH === 'left'  ? 0
+             : cfg.anchorH === 'right' ? W - scaledW
+             :                          (W - scaledW) / 2;
+
+    // Vertical: anchor to the side where the logo is
+    const y = cfg.anchorV === 'top' ? 0 : H - scaledH;
 
     const canvas = document.createElement('canvas');
     canvas.width  = W;
